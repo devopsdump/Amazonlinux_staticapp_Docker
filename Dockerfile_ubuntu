@@ -1,0 +1,29 @@
+FROM ubuntu:latest
+
+# Define the website URL and the directory name as build arguments
+ARG WEBSITE_URL=https://www.free-css.com/assets/files/free-css-templates/download/page296/inance.zip
+ARG WEBSITE_DIR=inance-html
+
+# Update the package lists and install Nginx and unzip
+RUN apt-get update && \
+    apt-get install -y nginx unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download and unzip the static website files
+ADD $WEBSITE_URL /tmp/
+RUN mkdir -p /usr/share/nginx/html && \
+    cd /usr/share/nginx/html && \
+    unzip /tmp/inance.zip && \
+    rm /tmp/inance.zip
+
+# Move contents of extracted directory to html root
+RUN mv /usr/share/nginx/html/$WEBSITE_DIR/* /usr/share/nginx/html && \
+    rm -rf /usr/share/nginx/html/$WEBSITE_DIR
+
+# Expose port 80 for HTTP traffic
+EXPOSE 80
+
+# Start Nginx in the foreground when the container starts
+CMD ["nginx", "-g", "daemon off;"]
+
